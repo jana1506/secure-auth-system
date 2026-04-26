@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify 2FA</title>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 50px auto; padding: 20px; }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Two-Factor Authentication</h1>
+    <p>Enter the 6-digit code from your authenticator app</p>
+    <form id="verifyForm">
+        <input type="text" id="code" placeholder="123456" maxlength="6" required>
+        <button type="submit">Verify</button>
+    </form>
+    <div id="message"></div>
+
+    <script>
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const tempToken = localStorage.getItem('tempToken');
+            const code = document.getElementById('code').value;
+            
+            const res = await fetch('/auth/verify-2fa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tempToken, code })
+            });
+            
+            const result = await res.json();
+            
+            if (res.ok && result.token) {
+                localStorage.setItem('token', result.token);
+                localStorage.setItem('user', JSON.stringify(result.user));
+                window.location.href = '/dashboard.html';
+            } else {
+                document.getElementById('message').innerHTML = 
+                    '<p style="color:red">' + (result.error || 'Verification failed') + '</p>';
+            }
+        });
+    </script>
+</body>
+</html>

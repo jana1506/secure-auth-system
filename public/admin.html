@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 50px auto; padding: 20px; }
+        a { display: block; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Admin Panel</h1>
+    <div id="content"></div>
+    <div id="message" style="color:red"></div>
+    <a href="/dashboard.html">← Back to Dashboard</a>
+
+    <script>
+        const token = localStorage.getItem('token');
+        
+        fetch('/admin', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('content').innerHTML = 
+                '<p style="color:green">' + data.message + '</p>';
+        })
+        .catch(() => {
+            document.getElementById('message').textContent = 'Access denied! Admin only.';
+        });
+    </script>
+</body>
+</html>

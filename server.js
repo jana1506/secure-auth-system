@@ -4,7 +4,7 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 app.use(express.json());   // parse JSON request bodies
-
+app.use(express.static('public'));  // serve static files
 // Use the authentication routes
 app.use('/auth', authRoutes);
 
