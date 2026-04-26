@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 50px auto; padding: 20px; }
+        a { display: block; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Your Profile</h1>
+    <div id="profile"></div>
+    <div id="message" style="color:red"></div>
+    <a href="/dashboard.html">← Back to Dashboard</a>
+
+    <script>
+        const token = localStorage.getItem('token');
+        
+        fetch('/profile', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.user) {
+                document.getElementById('profile').innerHTML = `
+                    <p><strong>ID:</strong> ${data.user.id}</p>
+                    <p><strong>Email:</strong> ${data.user.email}</p>
+                    <p><strong>Role:</strong> ${data.user.role}</p>
+                `;
+            }
+        })
+        .catch(err => {
+            document.getElementById('message').textContent = 'Access denied';
+        });
+    </script>
+</body>
+</html>
