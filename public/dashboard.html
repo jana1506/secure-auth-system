@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        a { color: #007bff; text-decoration: none; }
+        button { padding: 10px 20px; background: #dc3545; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <div class="card">
+        <h3>Welcome, <span id="userName"></span>!</h3>
+        <p>Email: <span id="userEmail"></span></p>
+        <p>Role: <span id="userRole"></span></p>
+    </div>
+    
+    <h3>Available Pages</h3>
+    <div class="card" id="adminLink" style="display:none">
+        <a href="/admin.html">🔧 Admin Panel</a>
+    </div>
+    <div class="card" id="managerLink" style="display:none">
+        <a href="/manager.html">📊 Manager Panel</a>
+    </div>
+    <div class="card">
+        <a href="/profile.html">👤 Profile</a>
+    </div>
+    <div class="card">
+        <a href="/user.html">📄 User Page</a>
+    </div>
+    
+    <button onclick="logout()">Logout</button>
+
+    <script>
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        // Verify token with backend
+        fetch('/dashboard', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('userName').textContent = data.user.email.split('@')[0];
+            document.getElementById('userEmail').textContent = data.user.email;
+            document.getElementById('userRole').textContent = data.user.role;
+            
+            if (data.user.role === 'admin') {
+                document.getElementById('adminLink').style.display = 'block';
+                document.getElementById('managerLink').style.display = 'block';
+            } else if (data.user.role === 'manager') {
+                document.getElementById('managerLink').style.display = 'block';
+            }
+        })
+        .catch(() => {
+            window.location.href = '/login.html';
+        });
+        
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>

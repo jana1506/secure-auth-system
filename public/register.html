@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 50px auto; padding: 20px; }
+        input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
+        #qrCode { text-align: center; margin: 20px 0; }
+        #qrCode img { max-width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Register</h1>
+    <form id="registerForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <select id="role" required>
+            <option value="">Select role</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="user">User</option>
+        </select>
+        <button type="submit">Register</button>
+    </form>
+    <div id="qrCode"></div>
+    <div id="message"></div>
+    <p>Already have an account? <a href="/login.html">Login</a></p>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                role: document.getElementById('role').value
+            };
+            
+            const res = await fetch('/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await res.json();
+            
+            if (res.ok) {
+                document.getElementById('message').innerHTML = 
+                    '<p style="color:green">' + result.message + '</p>';
+                document.getElementById('qrCode').innerHTML = 
+                    '<h3>Scan this QR code:</h3><img src="' + result.qrCode + '" alt="QR Code">';
+                document.getElementById('registerForm').style.display = 'none';
+            } else {
+                document.getElementById('message').innerHTML = 
+                    '<p style="color:red">' + result.error + '</p>';
+            }
+        });
+    </script>
+</body>
+</html>
