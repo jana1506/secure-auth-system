@@ -1,20 +1,17 @@
 require('dotenv').config();
-const { authenticateToken, authorizeRole } = require('./middleware/authMiddleware');
 const express = require('express');
+const { authenticateToken, authorizeRole } = require('./middleware/authMiddleware');
 const authRoutes = require('./routes/auth');
 
 const app = express();
-app.use(express.json());   // parse JSON request bodies
+app.use(express.json());
+app.use(express.static('public'));
 
-// Use the authentication routes
 app.use('/auth', authRoutes);
 
-// Root test route
 app.get('/', (req, res) => {
   res.json({ message: 'Secure Auth System is running' });
 });
-
-const PORT = process.env.PORT || 3000;
 
 // Protected routes
 app.get('/dashboard', authenticateToken, (req, res) => {
@@ -37,6 +34,7 @@ app.get('/user', authenticateToken, authorizeRole('user'), (req, res) => {
   res.json({ message: 'Welcome User!' });
 });
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard 🌸</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #ffe6f0;
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(255,105,180,0.3);
+      width: 400px;
+      text-align: center;
+    }
+    h1 { color: #ff69b4; margin-bottom: 20px; }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      background: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover { background: #ff1493; }
+    .logout { background: #ffb6c1; }
+    #message { color: #666; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🌸 Dashboard</h1>
+    <p id="message"></p>
+    <a class="btn" href="#" onclick="goTo('profile')">Profile</a>
+    <a class="btn" href="#" onclick="goTo('admin')">Admin Page</a>
+    <a class="btn" href="#" onclick="goTo('manager')">Manager Page</a>
+    <a class="btn" href="#" onclick="goTo('user')">User Page</a>
+    <button class="btn logout" onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'login.html';
+
+    fetch('/dashboard', {headers:{'Authorization':'Bearer '+token}})
+      .then(r => r.json())
+      .then(d => document.getElementById('message').innerText = d.message)
+      .catch(() => window.location.href = 'login.html');
+
+    async function goTo(page) {
+      const res = await fetch('/'+page, {headers:{'Authorization':'Bearer '+token}});
+      const data = await res.json();
+      alert(data.message || data.error);
+    }
+    function logout() { localStorage.removeItem('token'); window.location.href = 'login.html'; }
+  </script>
+</body>
+</html>
