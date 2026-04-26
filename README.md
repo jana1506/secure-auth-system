@@ -1,4 +1,4 @@
-Here's your complete testing script:
+
 
 ---
 
@@ -11,7 +11,7 @@ node server.js
 
 ---
 
-### Step 2: Register users (run in a second PowerShell window)
+### Step 2: Register users
 
 **Navigate to project folder:**
 ```
@@ -36,9 +36,7 @@ $body = @{name="NormalUser"; email="usertest@test.com"; password="user123"; role
 ---
 
 ### Step 3: Scan QR codes
-For each registration, copy the long string (starts with `data:image/png;base64,...`), paste in browser address bar, press Enter, and scan with Google Authenticator.
 
----
 
 ### Step 4: Login with password (get temp token)
 
@@ -60,21 +58,20 @@ $body = @{email="usertest@test.com"; password="user123"} | ConvertTo-Json; $logi
 ---
 
 ### Step 5: Verify 2FA and get JWT token
-(Replace `123456` with the current code from your authenticator app)
 
 **Admin:**
 ```
-$code = "123456"; $body = @{tempToken=$tempToken; code=$code} | ConvertTo-Json; $response = Invoke-RestMethod -Uri http://localhost:3000/auth/verify-2fa -Method Post -Body $body -ContentType "application/json"; $token = $response.token; $response.message
+$code = "ourcode"; $body = @{tempToken=$tempToken; code=$code} | ConvertTo-Json; $response = Invoke-RestMethod -Uri http://localhost:3000/auth/verify-2fa -Method Post -Body $body -ContentType "application/json"; $token = $response.token; $response.message
 ```
 
 **Manager:**
 ```
-$code = "123456"; $body = @{tempToken=$tempToken; code=$code} | ConvertTo-Json; $response = Invoke-RestMethod -Uri http://localhost:3000/auth/verify-2fa -Method Post -Body $body -ContentType "application/json"; $token = $response.token; $response.message
+$code = "code"; $body = @{tempToken=$tempToken; code=$code} | ConvertTo-Json; $response = Invoke-RestMethod -Uri http://localhost:3000/auth/verify-2fa -Method Post -Body $body -ContentType "application/json"; $token = $response.token; $response.message
 ```
 
 **User:**
 ```
-$code = "123456"; $body = @{tempToken=$tempToken; code=$code} | ConvertTo-Json; $response = Invoke-RestMethod -Uri http://localhost:3000/auth/verify-2fa -Method Post -Body $body -ContentType "application/json"; $token = $response.token; $response.message
+$code = "code"; $body = @{tempToken=$tempToken; code=$code} | ConvertTo-Json; $response = Invoke-RestMethod -Uri http://localhost:3000/auth/verify-2fa -Method Post -Body $body -ContentType "application/json"; $token = $response.token; $response.message
 ```
 
 ---
@@ -127,4 +124,4 @@ Should return: `Access denied. Insufficient permissions.`
 
 ---
 
-Save this as `testing_script.txt` in your project folder!
+
