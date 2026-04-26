@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
-const { createUser, findUserByEmail } = require('../db');
+const { createUser, findUserByEmail, findUserById } = require('../db');
 
 const router = express.Router();
 
@@ -50,6 +50,89 @@ router.post('/register', async (req, res) => {
       qrCode: qrCodeDataURL
     });
 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /auth/login
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const user = findUserByEmail(email);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.hashed_password);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const jwt = require('jsonwebtoken');
+    const tempToken = jwt.sign(
+      { userId: user.id, step: '2fa' },
+      process.env.JWT_SECRET,
+      { expiresIn: '5m' }
+    );
+
+    res.json({ message: 'Password correct. Please enter 2FA code.', tempToken });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /auth/verify-2fa
+router.post('/verify-2fa', (req, res) => {
+  try {
+    const { tempToken, code } = req.body;
+
+    if (!tempToken || !code) {
+      return res.status(400).json({ error: 'Temporary token and 2FA code are required' });
+    }
+
+    const jwt = require('jsonwebtoken');
+    let decoded;
+    try {
+      decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+    } catch {
+      return res.status(401).json({ error: 'Invalid or expired temporary token' });
+    }
+
+    if (decoded.step !== '2fa') {
+      return res.status(401).json({ error: 'Invalid token step' });
+    }
+
+    const user = findUserById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    const speakeasy = require('speakeasy');
+    const verified = speakeasy.totp.verify({
+      secret: user.twofa_secret,
+      encoding: 'base32',
+      token: code
+    });
+
+    if (!verified) {
+      return res.status(401).json({ error: 'Invalid 2FA code' });
+    }
+
+    const realToken = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({ message: 'Login successful', token: realToken });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });

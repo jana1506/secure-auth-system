@@ -32,7 +32,13 @@ function findUserByEmail(email) {
   return stmt.get(email);  // returns the row (object) or undefined
 }
 
+function findUserById(id) {
+  const stmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
+  return stmt.get(id);
+}
+
 module.exports = {
   createUser,
-  findUserByEmail
+  findUserByEmail,
+  findUserById
 };
